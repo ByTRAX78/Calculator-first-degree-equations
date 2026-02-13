@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solver de Ecuaciones Pro</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h2 { text-align: center; color: var(--primary); margin-bottom: 1.5rem; }
+
+        .form-group { margin-bottom: 1rem; }
+        
+        label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.9rem; }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+
+        #pasos {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f1f5f9;
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            display: none;
+        }
+
+        .paso-item {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .paso-num {
+            background: var(--accent);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .resultado-final {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Solucionador de Ecuaciones</h2>
+    
+    <div class="form-group">
+        <label>1. Elige la Estructura</label>
+        <select id="estructura">
+            <option value="1">A M (B * X) = C</option>
+            <option value="2">(A * X) M B = C</option>
+            <option value="3">(A / X) M B = C</option>
+            <option value="4">A M (B / X) = C</option>
+            <option value="5">(X / A) M B = C</option>
+        </select>
+    </div>
+
+    <div class="grid-inputs">
+        <div class="form-group">
+            <label>Valor A</label>
+            <input type="number" id="valA" value="25">
+        </div>
+        <div class="form-group">
+            <label>Operador M</label>
+            <select id="opM">
+                <option value="+">+</option>
+                <option value="-">-</option>
+                <option value="*">*</option>
+                <option value="/">/</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Valor B</label>
+            <input type="number" id="valB" value="5">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Resultado C</label>
+        <input type="number" id="valC" value="50">
+    </div>
+
+    <button onclick="resolverEcuacion()">Resolver Paso a Paso</button>
+
+    <div id="pasos">
+        <div id="listaPasos"></div>
+        <div id="resultadoFinal" class="resultado-final"></div>
+    </div>
+</div>
+
+<script>
+    function resolverEcuacion() {
+        const a = parseFloat(document.getElementById('valA').value);
+        const b = parseFloat(document.getElementById('valB').value);
+        const c = parseFloat(document.getElementById('valC').value);
+        const op = document.getElementById('opM').value;
+        const opcion = document.getElementById('estructura').value;
+        
+        const contenedorPasos = document.getElementById('pasos');
+        const lista = document.getElementById('listaPasos');
+        const resFinal = document.getElementById('resultadoFinal');
+        
+        lista.innerHTML = "";
+        contenedorPasos.style.display = "block";
+        let x = null;
+        let pasosArr = [];
+
+        // Funciones de lógica (Tu Algoritmo)
+        function explicarM(valA, resC, operador) {
+            if (operador === '+') {
+                pasosArr.push(`Restamos ${valA} a ambos lados para despejar el término de X.`);
+                return resC - valA;
+            }
+            if (operador === '-') {
+                pasosArr.push(`Como ${valA} es positivo, al moverlo queda: ${valA} - ${resC}.`);
+                return valA - resC;
+            }
+            if (operador === '*') {
+                pasosArr.push(`Dividimos ambos lados por ${valA}.`);
+                return resC / valA;
+            }
+            if (operador === '/') {
+                pasosArr.push(`Despejamos el divisor: ${valA} / ${resC}.`);
+                return valA / resC;
+            }
+        }
+
+        function explicarSimple(resC, valB, operador) {
+            if (operador === '+') return { val: resC - valB, msg: `Restamos ${valB}` };
+            if (operador === '-') return { val: resC + valB, msg: `Sumamos ${valB}` };
+            if (operador === '*') return { val: resC / valB, msg: `Dividimos por ${valB}` };
+            if (operador === '/') return { val: resC * valB, msg: `Multiplicamos por ${valB}` };
+        }
+
+        // Resolución según estructura
+        try {
+            if (opcion === "1") {
+                let bx = explicarM(a, c, op);
+                pasosArr.push(`Resultado intermedio: (${b} * X) = ${bx}`);
+                pasosArr.push(`Finalmente, dividimos por ${b} para aislar X.`);
+                x = bx / b;
+            } 
+            else if (opcion === "2") {
+                let res = explicarSimple(c, b, op);
+                pasosArr.push(`${res.msg} en ambos lados.`);
+                pasosArr.push(`Resultado intermedio: (${a} * X) = ${res.val}`);
+                pasosArr.push(`Dividimos por ${a} para aislar X.`);
+                x = res.val / a;
+            }
+            else if (opcion === "3") {
+                let res = explicarSimple(c, b, op);
+                pasosArr.push(`${res.msg} en ambos lados.`);
+                pasosArr.push(`Resultado intermedio: (${a} / X) = ${res.val}`);
+                pasosArr.push(`Intercambiamos X con el resultado: X = ${a} / ${res.val}`);
+                x = a / res.val;
+            }
+            else if (opcion === "4") {
+                let bx = explicarM(a, c, op);
+                pasosArr.push(`Resultado intermedio: (${b} / X) = ${bx}`);
+                pasosArr.push(`Intercambiamos X con el resultado: X = ${b} / ${bx}`);
+                x = b / bx;
+            }
+            else if (opcion === "5") {
+                let res = explicarSimple(c, b, op);
+                pasosArr.push(`${res.msg} en ambos lados.`);
+                pasosArr.push(`Resultado intermedio: (X / ${a}) = ${res.val}`);
+                pasosArr.push(`Multiplicamos por ${a} para aislar X.`);
+                x = res.val * a;
+            }
+
+            // Renderizar pasos
+            pasosArr.forEach((p, index) => {
+                lista.innerHTML += `<div class="paso-item"><span class="paso-num">${index + 1}</span>${p}</div>`;
+            });
+            resFinal.innerText = `Resultado: X = ${x.toFixed(2).replace('.00', '')}`;
+
+        } catch (e) {
+            resFinal.innerText = "Error en el cálculo (posible división por cero)";
+        }
+    }
+</script>
+
+</body>
+</html>
